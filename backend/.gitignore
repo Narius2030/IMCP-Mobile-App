@@ -1,0 +1,6 @@
+/.venv
+/.env
+/temp.py
+/*.ipynb
+/utils/vgg16-lstm
+/utils/yolo8-bert-lstm

@@ -1,6 +1,6 @@
 ![image](https://github.com/user-attachments/assets/8da791fd-2d60-43ab-97d7-279d0a02a6bc)
 
-For containerizing the backend to deploy on server, we should to run this Dockerfile
+For containerizing the backend to deploy on server, we should run this Dockerfile. Furthermore, Our backend is erect on FastAPI which is one of Python's frameworks
 ```Dockerfile
 # Sử dụng Python 3.11 làm image cơ sở
 FROM python:3.11-slim

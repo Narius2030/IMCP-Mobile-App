@@ -1,9 +1,11 @@
+import 'package:client/core/utils/injection_container.dart';
 import 'package:client/presentation/screens/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
+  configureDependencies();
   runApp(const ImcpApp());
 }
 

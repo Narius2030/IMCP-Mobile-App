@@ -25,3 +25,7 @@ EXPOSE 8000
 # Khởi chạy FastAPI khi container được khởi động
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
+
+Demo of mobile application
+
+![image](https://github.com/user-attachments/assets/9d0ef6cc-d816-49b5-af7b-c3fef1dac79c)

@@ -1,7 +1,7 @@
 ![image](https://github.com/user-attachments/assets/8da791fd-2d60-43ab-97d7-279d0a02a6bc)
 
 For containerizing the backend to deploy on server, we should to run this Dockerfile
-```yaml
+```yml
 # Sử dụng Python 3.11 làm image cơ sở
 FROM python:3.11-slim
 

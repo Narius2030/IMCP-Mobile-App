@@ -1,4 +1,5 @@
-![image](https://github.com/user-attachments/assets/8da791fd-2d60-43ab-97d7-279d0a02a6bc)
+![image](https://github.com/user-attachments/assets/f63f8add-2e4d-45b9-ac22-807c986b4ff0)
+
 
 For containerizing the backend to deploy on server, we should run this Dockerfile. Furthermore, Our backend is erect on `FastAPI` which is one of Python's frameworks
 ```Dockerfile

@@ -33,7 +33,10 @@ class ImageService {
     var imagePixel = await getBase64String(imageFile);
     var shape = await getImageShape(imageFile);
 
-    return ImageModel(imagePixel: imagePixel, shape: shape);
+    return ImageModel(
+      imagePixel: imagePixel,
+      shape: shape,
+    );
   }
 
   Future<List<int>> getImageShape(XFile imageFile) async {

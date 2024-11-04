@@ -52,7 +52,6 @@ class ImageService {
     int width = image.width;
     int height = image.height;
 
-    //Get image channel
     int channel = 0;
 
     img.Image? decodedImage = img.decodeImage(imageBytes);

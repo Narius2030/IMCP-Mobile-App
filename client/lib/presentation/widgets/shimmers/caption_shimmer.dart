@@ -33,6 +33,7 @@ class CaptionShimmer extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 16.0),
         Shimmer.fromColors(
           baseColor: Colors.grey.shade300,
           highlightColor: Colors.grey.shade100,

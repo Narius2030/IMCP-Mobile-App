@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:client/models/image_model.dart';
 import 'package:client/presentation/widgets/shimmers/caption_shimmer.dart';
 import 'package:client/services/image_service.dart';
 import 'package:dio/dio.dart';
@@ -30,6 +31,12 @@ class _CaptionModalBottomState extends State<CaptionModalBottom> {
   final CancelToken cancelToken = CancelToken();
   final FlutterTts flutterTts = FlutterTts();
 
+  void unawaited(Future<void> future) {
+    future.catchError((error, stackTrace) {
+      log("Uncaught Future error: $error", stackTrace: stackTrace);
+    });
+  }
+
   Future<String> getImageCaption() async {
     try {
       var imageModel = await imageService.getImageModel(widget.imagePreview);
@@ -39,11 +46,31 @@ class _CaptionModalBottomState extends State<CaptionModalBottom> {
         cancelToken,
       );
       String caption = response["predicted_caption"];
-      await speakCaption(caption); 
-      return caption;
+
+      unawaited(saveUserDataInBackground(imageModel, caption));
+      String cleanCaption = imageService.cleanCaption(caption);
+      await speakCaption(cleanCaption);
+      return cleanCaption;
     } catch (e) {
       log("Error getting caption for image $e");
       throw Exception("Error getting caption for image $e");
+    }
+  }
+
+  Future<void> saveUserDataInBackground(
+      ImageModel imageModel, String caption) async {
+    try {
+      // Chạy API lưu dữ liệu trong microtask
+      await Future.microtask(
+        () => imageService.saveUserData(
+          imageModel,
+          caption,
+          cancelToken,
+        ),
+      );
+      log("User data saved successfully");
+    } catch (e) {
+      log("Error saving user data: $e");
     }
   }
 
@@ -51,7 +78,6 @@ class _CaptionModalBottomState extends State<CaptionModalBottom> {
     await flutterTts.setLanguage("en-US");
     await flutterTts.setPitch(1.0);
     await flutterTts.setSpeechRate(0.5);
-
     await flutterTts.speak(caption);
   }
 

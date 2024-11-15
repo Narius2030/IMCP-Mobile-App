@@ -16,6 +16,21 @@ class ImageService {
   Future<Map<String, dynamic>> getImageCaption(
       ImageModel imageModel, String lstmModel, CancelToken cancelToken) async {
     try {
+      switch (lstmModel) {
+        case "VGG16 LSTM":
+          lstmModel = "vgg16-lstm";
+          break;
+        case "Yolo BERT LSTM":
+          lstmModel = "yolo8-bert-lstm";
+          break;
+        case "Yolo GPT":
+          lstmModel = "yolo8-gpt";
+          break;
+        default:
+          lstmModel = "yolo8-bert-lstm";
+          break;
+      }
+      log(lstmModel);
       var url = "${AppConstants.API_GENERATE_CAPTION}/$lstmModel";
       final response = await dio.post(
         url,
@@ -74,5 +89,40 @@ class ImageService {
     final bytes = await imageFile.readAsBytes();
     String base64String = base64Encode(bytes);
     return base64String;
+  }
+
+  Future<void> saveUserData(
+      ImageModel imageModel, String caption, CancelToken cancelToken) async {
+    try {
+      var url = "${AppConstants.API_GENERATE_CAPTION}/ingest-user-data";
+      await dio.post(
+        url,
+        data: {
+          ...imageModel.toJson(),
+          "caption": caption,
+        },
+        cancelToken: cancelToken,
+      );
+    } catch (e) {
+      throw Exception("Error saving user data $e");
+    }
+  }
+
+  String cleanCaption(String caption) {
+    String cleanedCaption = caption
+        .replaceAll(RegExp(r'[^a-zA-Z0-9\s.,!?\"]'), '') // Xóa ký tự đặc biệt
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+
+    List<String> words = cleanedCaption.split(' ');
+
+    if (words.length > 2) {
+      words.removeAt(0);
+      words.removeAt(words.length - 1);
+    } else {
+      return '';
+    }
+
+    return words.join(' ');
   }
 }

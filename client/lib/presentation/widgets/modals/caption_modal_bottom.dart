@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:client/core/utils/colors.dart';
 import 'package:client/models/image_model.dart';
 import 'package:client/presentation/widgets/shimmers/caption_shimmer.dart';
 import 'package:client/services/image_service.dart';
@@ -110,6 +111,7 @@ class _CaptionModalBottomState extends State<CaptionModalBottom> {
                     Align(
                       alignment: Alignment.topRight,
                       child: IconButton(
+                        color: Color(0xFF212121),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -147,9 +149,7 @@ class _CaptionModalBottomState extends State<CaptionModalBottom> {
                                 ),
                               ],
                               fontSize: 20,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black87,
-                              fontFamily: 'Roboto',
+                              color: Color(0xFF212121),
                               letterSpacing: 0.5,
                             ),
                           );

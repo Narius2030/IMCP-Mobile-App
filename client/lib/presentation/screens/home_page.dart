@@ -3,7 +3,7 @@ import 'dart:developer';
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:client/presentation/widgets/modals/caption_modal_bottom.dart';
 import 'package:client/core/utils/colors.dart';
-import 'package:client/presentation/widgets/segmented_control.dart';
+import 'package:client/presentation/widgets/model_wheel_picker.dart';
 import 'package:client/services/image_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +19,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final lstmModel = ["vgg16-lstm", "yolo8-bert-lstm", "yolo8-nobert-ltsm"];
+  final lstmModel = ["VGG16 LSTM", "Yolo BERT LSTM", "Yolo GPT"];
   var chosenModel = "";
 
   @override
@@ -90,9 +90,10 @@ class _HomePageState extends State<HomePage> {
                   decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.5),
                   ),
-                  child: SegmentedControls(
+                  child: ModelWheelPicker(
                     options: lstmModel,
                     onValueChanged: (selected) {
+                      log('Selected model: $selected');
                       chosenModel = selected;
                     },
                   ),
@@ -127,6 +128,7 @@ class _HomePageState extends State<HomePage> {
                       chosenModel: chosenModel,
                     ),
                   );
+                  
                 },
               );
             case (MediaCaptureStatus.failure, true):

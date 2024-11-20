@@ -1,10 +1,13 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:client/core/utils/colors.dart';
+import 'package:client/models/image_model.dart';
 import 'package:client/presentation/widgets/shimmers/caption_shimmer.dart';
 import 'package:client/services/image_service.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart'; // Import the package
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:typewritertext/typewritertext.dart';
@@ -26,7 +29,14 @@ class CaptionModalBottom extends StatefulWidget {
 class _CaptionModalBottomState extends State<CaptionModalBottom> {
   var imageService = GetIt.I<ImageService>();
   late Future _future;
-  CancelToken cancelToken = CancelToken();
+  final CancelToken cancelToken = CancelToken();
+  final FlutterTts flutterTts = FlutterTts();
+
+  void unawaited(Future<void> future) {
+    future.catchError((error, stackTrace) {
+      log("Uncaught Future error: $error", stackTrace: stackTrace);
+    });
+  }
 
   Future<String> getImageCaption() async {
     try {
@@ -36,11 +46,40 @@ class _CaptionModalBottomState extends State<CaptionModalBottom> {
         widget.chosenModel,
         cancelToken,
       );
-      return response["predicted_caption"];
+      String caption = response["predicted_caption"];
+
+      unawaited(saveUserDataInBackground(imageModel, caption));
+      String cleanCaption = imageService.cleanCaption(caption);
+      await speakCaption(cleanCaption);
+      return cleanCaption;
     } catch (e) {
       log("Error getting caption for image $e");
       throw Exception("Error getting caption for image $e");
     }
+  }
+
+  Future<void> saveUserDataInBackground(
+      ImageModel imageModel, String caption) async {
+    try {
+      // Chạy API lưu dữ liệu trong microtask
+      await Future.microtask(
+        () => imageService.saveUserData(
+          imageModel,
+          caption,
+          cancelToken,
+        ),
+      );
+      log("User data saved successfully");
+    } catch (e) {
+      log("Error saving user data: $e");
+    }
+  }
+
+  Future<void> speakCaption(String caption) async {
+    await flutterTts.setLanguage("en-US");
+    await flutterTts.setPitch(1.0);
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.speak(caption);
   }
 
   @override
@@ -52,76 +91,78 @@ class _CaptionModalBottomState extends State<CaptionModalBottom> {
   @override
   void dispose() {
     cancelToken.cancel();
+    flutterTts.stop();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Material(
-        child: SafeArea(
-      top: false,
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
+      child: SafeArea(
+        top: false,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                        color: Color(0xFF212121),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: Icon(Icons.close),
+                      ),
+                    ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(5),
+                      child: Image.file(
+                        File(widget.imagePreview.path),
+                        width: double.infinity,
+                        height: 200,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    FutureBuilder(
+                      future: _future,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CaptionShimmer();
+                        } else if (snapshot.hasError) {
+                          return Text("Error: ${snapshot.error}");
+                        } else {
+                          return TypeWriter.text(
+                            duration: const Duration(milliseconds: 10),
+                            snapshot.data.toString(),
+                            style: const TextStyle(
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black12,
+                                  offset: Offset(0, 1),
+                                  blurRadius: 2,
+                                ),
+                              ],
+                              fontSize: 20,
+                              color: Color(0xFF212121),
+                              letterSpacing: 0.5,
+                            ),
+                          );
+                        }
                       },
-                      icon: Icon(Icons.close),
                     ),
-                  ),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(5),
-                    child: Image.file(
-                      File(widget.imagePreview.path),
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  FutureBuilder(
-                    future: _future,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const CaptionShimmer();
-                      } else if (snapshot.hasError) {
-                        return Text("Error: ${snapshot.error}");
-                      } else {
-                        return TypeWriter.text(
-                          duration: const Duration(milliseconds: 10),
-                          snapshot.data.toString(),
-                          style: const TextStyle(
-                            shadows: [
-                              Shadow(
-                                color: Colors.black12,
-                                offset: Offset(0, 1),
-                                blurRadius: 2,
-                              ),
-                            ],
-                            fontSize: 20,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
-                            fontFamily: 'Roboto',
-                            letterSpacing: 0.5,
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ));
+    );
   }
 }

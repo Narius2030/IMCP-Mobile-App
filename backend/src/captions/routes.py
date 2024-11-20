@@ -1,12 +1,9 @@
 import sys
 sys.path.append('./')
 
-from core.database import Database
 from fastapi import status, APIRouter, Depends
-from fastapi.responses import JSONResponse
-from src.captions.services import getCaptionTokens, getOnlyTokens, getOnlyTexts
+from src.captions.services import getCaptionTokens, getOnlyTokens, getOnlyTexts, getCaptionTokensMobile
 from core.config import get_settings
-from motor import motor_asyncio
 from core.security import oauth2_scheme
 import logging
 
@@ -27,33 +24,31 @@ logger = logging.getLogger("uvicorn")
 
 
 # Get text + token for caption and short_caption
-@caption_router.get("/text-tokens/{num_rows}", status_code=status.HTTP_200_OK)
-async def get_caption_tokens(num_rows):
-    data = await getCaptionTokens(num_rows)
-    payload = {
-        "data": data
-    }
+@caption_router.get("/all/text-tokens", status_code=status.HTTP_200_OK)
+async def get_caption_tokens(page:int, per_page:int):
+    data = await getCaptionTokens(page, per_page)
     logger.info(f'========== Fetched successfully texts-tokens: {len(data)} ==========')
-    return JSONResponse(content=payload)
+    return data
 
 
 # Get only token for caption and short_caption
-@caption_router.get("/tokens/{num_rows}", status_code=status.HTTP_200_OK)
-async def get_tokens(num_rows):
-    data = await getOnlyTokens(num_rows)
-    payload = {
-        "data": data
-    }
+@caption_router.get("/all/tokens", status_code=status.HTTP_200_OK)
+async def get_tokens(page:int, per_page:int):
+    data = await getOnlyTokens(page, per_page)
     logger.info(f'========== Fetched successfully tokens: {len(data)} ==========')
-    return JSONResponse(content=payload)
+    return data
 
 
 # Get only text for caption and short_caption
-@caption_router.get("/texts/{num_rows}", status_code=status.HTTP_200_OK)
-async def get_texts(num_rows):
-    data = await getOnlyTexts(num_rows)
-    payload = {
-        "data": data
-    }
+@caption_router.get("/all/texts", status_code=status.HTTP_200_OK)
+async def get_texts(page:int, per_page:int):
+    data = await getOnlyTexts(page, per_page)
     logger.info(f'========== Fetched successfully caption texts: {len(data)} ==========')
-    return JSONResponse(content=payload)
+    return data
+
+
+@caption_router.get("/mobile/text-tokens", status_code=status.HTTP_200_OK)
+async def get_caption_tokens_mobile(page:int, per_page:int):
+    data = await getCaptionTokensMobile(page, per_page)
+    logger.info(f'========== Fetched successfully texts-tokens: {len(data)} ==========')
+    return data

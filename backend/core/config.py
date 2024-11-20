@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     MINIO_USER:str = os.getenv('MINIO_USER')
     MINIO_PASSWD:str = os.getenv('MINIO_PASSWD')
     MINIO_URL:str = os.getenv('MINIO_URL')
+    # Tokenizer
+    BERT_TOKENIZERS:str = os.getenv('BERT_TOKENIZERS')
     
 def get_settings() -> Settings:
     return Settings()

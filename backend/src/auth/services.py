@@ -32,7 +32,7 @@ async def get_token(data):
     return await _get_user_token(user=user)
 
 
-async def get_refresh_token(token, db):   
+async def get_refresh_token(token:str):   
     payload = get_token_payload(token=token)
     
     username = payload.get('username', None)
@@ -42,14 +42,15 @@ async def get_refresh_token(token, db):
             detail="Invalid refresh token.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
-    user = db['user_account'].find_one({"username": username})
-    if not user:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid refresh token.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    with pymongo.MongoClient(settings.DATABASE_URL) as client:
+        db = client['imcp']
+        user = db['user_account'].find_one({"username": username})
+        if not user:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid refresh token.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         
     return await _get_user_token(user=user, refresh_token=token)
 

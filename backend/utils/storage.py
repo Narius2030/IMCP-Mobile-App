@@ -1,8 +1,6 @@
 from minio import Minio
 from minio.error import S3Error
-from tensorflow.keras.models import load_model
 import tempfile
-import io
 import os
 
 
@@ -65,30 +63,33 @@ class MinioStorageOperator:
                 print(f"Bucket {bucket_name} đã tồn tại.")
         except S3Error as e:
             print(f"Lỗi khi tạo bucket: {str(e)}")
-            
-    def load_object_bytes(self, file_type:str, bucket_name:str, object_name:str, version_id=None):
-        """Lấy Object từ MinIO dưới dạng byte stream."""
+    
+    def create_presigned_url(self, bucket_name, object_name) -> str:
+        """
+        Create new *Presigned URL* in MinIO.
+
+        :param bucket_name: Name of bucket containing that object.
+        """
+        return self.client.get_presigned_url(
+            method='GET',
+            bucket_name=bucket_name,
+            object_name=object_name
+        )
+        
+    def load_object_bytes(self, bucket_name, object_name, version_id=None):
+        """
+        Get object in stream bytes from MinIO.
+
+        :param bucket_name: Name of bucket containing that object.
+        """
         try:
             # Lấy đối tượng từ MinIO dưới dạng byte stream
             response  = self.client.get_object(bucket_name, object_name, version_id=version_id)
-            
-             # Đọc toàn bộ nội dung object vào biến byte stream
             data = response.read()
-            print(f"Object size: {len(data)} bytes")
-            # Tạo một file tạm để lưu dữ liệu
-            if file_type == 'model':
-                suffix = ".keras"
-            else:
-                suffix = ".weights.h5"
-            temp_file = tempfile.NamedTemporaryFile(delete=False, dir='D:/tmp', suffix=suffix)
-            temp_file.write(data)  # Ghi dữ liệu vào file tạm
-            temp_file.close()  # Đóng file để hoàn tất ghi dữ liệu
-            print("Object loaded successfully from MinIO.")
-            return temp_file.name
-        except Exception as e:
-            print(f"Error loading object from MinIO: {str(e)}")
-            return None
-        
+            return data
+        except S3Error as err:
+            print(f"Error loading file: {err}")
+    
     def upload_object_bytes(self, objec_data, bucket_name:str, object_name:str, content_type:str):
         """
         Upload đối tượng dưới dạng bytes từ một đường dẫn URL
@@ -97,8 +98,6 @@ class MinioStorageOperator:
         :param bucket_name: tên bucket
         :param object_name: đường dẫn tới tên của đối tượng trên MinIO
         """
-        # image_bytes = io.BytesIO(objec_data)
-        # Upload dữ liệu từ BytesIO lên MinIO
         try:
             self.client.put_object(
                 bucket_name = bucket_name,
@@ -116,20 +115,3 @@ class MinioStorageOperator:
             with open(path, "wb") as f:
                 f.write(stream.getvalue())
             print("File downloaded and saved locally.")
-    
-    def load_model_from_minio(self, file_type:str, bucket_name:str, object_name:str, version_id=None, base_model=None):
-        """Load mô hình Keras từ stream bằng cách sử dụng file tạm."""
-        temp_weight_path = self.load_object_bytes(file_type, bucket_name, object_name, version_id)
-        print(temp_weight_path)
-        try:
-            if file_type == 'model':
-                base_model = load_model(temp_weight_path)
-            else:
-                base_model.load_weights(temp_weight_path)
-                
-            print("Model loaded successfully from temporary file.")
-            return base_model
-        except Exception as e:
-            print(f"Error loading model: {str(e)}")
-        finally:
-            os.remove(temp_weight_path)

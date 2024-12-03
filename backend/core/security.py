@@ -1,5 +1,5 @@
 import sys
-sys.path.append('./')
+sys.path.append('.')
 
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer

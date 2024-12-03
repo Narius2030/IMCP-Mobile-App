@@ -49,6 +49,7 @@ class _CaptionModalBottomState extends State<CaptionModalBottom> {
       String caption = response["predicted_caption"];
 
       unawaited(saveUserDataInBackground(imageModel, caption));
+
       String cleanCaption = imageService.cleanCaption(caption);
       await speakCaption(cleanCaption);
       return cleanCaption;
@@ -97,72 +98,71 @@ class _CaptionModalBottomState extends State<CaptionModalBottom> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: SafeArea(
-        top: false,
-        child: SingleChildScrollView(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: const BoxDecoration(
+            color: Color(0xFFFAF9F6),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(10),
+              topRight: Radius.circular(10),
+            ),
+          ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: IconButton(
-                        color: Color(0xFF212121),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: Icon(Icons.close),
-                      ),
-                    ),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(5),
-                      child: Image.file(
-                        File(widget.imagePreview.path),
-                        width: double.infinity,
-                        height: 200,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    FutureBuilder(
-                      future: _future,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CaptionShimmer();
-                        } else if (snapshot.hasError) {
-                          return Text("Error: ${snapshot.error}");
-                        } else {
-                          return TypeWriter.text(
-                            duration: const Duration(milliseconds: 10),
-                            snapshot.data.toString(),
-                            style: const TextStyle(
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black12,
-                                  offset: Offset(0, 1),
-                                  blurRadius: 2,
-                                ),
-                              ],
-                              fontSize: 20,
-                              color: Color(0xFF212121),
-                              letterSpacing: 0.5,
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                  ],
+              Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  color: const Color(0xFF212121),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(Icons.close),
                 ),
+              ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: Image.file(
+                  File(widget.imagePreview.path),
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 10),
+              FutureBuilder(
+                future: _future,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CaptionShimmer();
+                  } else if (snapshot.hasError) {
+                    return Text("Error: ${snapshot.error}");
+                  } else {
+                    return TypeWriter.text(
+                      duration: const Duration(milliseconds: 10),
+                      snapshot.data.toString() + snapshot.data.toString(),
+                      style: const TextStyle(
+                        shadows: [
+                          Shadow(
+                            color: Colors.black12,
+                            offset: Offset(0, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
+                        fontSize: 20,
+                        color: Color(0xFF212121),
+                        letterSpacing: 0.5,
+                      ),
+                    );
+                  }
+                },
               ),
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 }

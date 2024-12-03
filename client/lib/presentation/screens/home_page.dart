@@ -7,7 +7,6 @@ import 'package:client/presentation/widgets/model_wheel_picker.dart';
 import 'package:client/services/image_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
@@ -19,7 +18,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final lstmModel = ["VGG16 LSTM", "Yolo BERT LSTM", "Yolo GPT"];
+  final lstmModel = ["VGG16 LSTM", "Yolo GPT"];
   var chosenModel = "";
 
   @override
@@ -119,16 +118,16 @@ class _HomePageState extends State<HomePage> {
                   }
 
                   XFile image = single.file!;
-                  showCupertinoModalBottomSheet(
-                    expand: true,
+                  showModalBottomSheet(
                     context: context,
+                    elevation: 2.0,
+                    isScrollControlled: true,
                     backgroundColor: Colors.transparent,
                     builder: (context) => CaptionModalBottom(
                       imagePreview: image,
                       chosenModel: chosenModel,
                     ),
                   );
-                  
                 },
               );
             case (MediaCaptureStatus.failure, true):

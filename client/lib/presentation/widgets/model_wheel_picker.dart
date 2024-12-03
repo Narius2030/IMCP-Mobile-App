@@ -19,12 +19,12 @@ class ModelWheelPicker extends StatelessWidget {
       selectTextStyle: const TextStyle(
         color: Color(0xFFD7E0FF),
         fontSize: 16,
-          fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w900,
       ),
       unSelectTextStyle: const TextStyle(
         color: AppColors.grey,
         fontSize: 16,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.w900,
       ),
     );
   }

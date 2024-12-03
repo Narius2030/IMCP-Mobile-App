@@ -12,14 +12,15 @@ from fastapi.exceptions import HTTPException
 from core.config import get_settings
 from src.generation.models import Images, InsertUserData
 from utils.generator.yolo import YOLOBertGenerator, YOLOGptGenerator
+from utils.generator.vgg16 import VGG16Generator
 from utils.storage import MinioStorageOperator
 from utils.database import MongoDBOperator
 
 ## Global config variabels
 settings = get_settings()
-vgg_operator = None #VGG16Generator('full', 'mlflow','/models/vgg16_lstm/img_caption_model.h5')
-yolo_bert = YOLOBertGenerator('mlflow','/models/yolo_lstm/yolo_bert_lstm_8ep_cp-0001.weights.h5', './utils/pre-trained/yolov8n.pt')
-yolo_gpt = YOLOGptGenerator('mlflow','/models/yolo_gpt2_v6ep', './utils/pre-trained/yolov8n.pt')
+vgg_operator = VGG16Generator('mlflow','/models/vgg16_lstm/img_caption_model.h5')
+yolo_bert = None #YOLOBertGenerator('mlflow','/models/yolo_lstm/yolo_bert_lstm_8ep_cp-0001.weights.h5', './utils/pre-trained/yolov8n.pt')
+yolo_gpt = None #YOLOGptGenerator('mlflow','/models/yolo_gpt2_v6ep', './utils/pre-trained/yolov8n.pt')
 minio_operator = MinioStorageOperator(endpoint=f'{settings.MINIO_HOST}:{settings.MINIO_PORT}', access_key=settings.MINIO_USER, secret_key=settings.MINIO_PASSWD)
 mongo_operator = MongoDBOperator('imcp', settings.DATABASE_URL)
 
@@ -46,14 +47,10 @@ async def insert_user_data(image_rgb, image_name, predicted_caption):
     data['url'] = f"""{settings.MINIO_URL}/mlflow/user_images/{image_name}"""
     data['image_shape'] = image_rgb.shape
     data['predicted_caption'] = str(predicted_caption)
-    data['manualcaption'] = ""
+    data['manual_caption'] = ""
     data['created_time'] = datetime.now()
     datasets.append(data)
     mongo_operator.insert_batches('user_data', datasets)
-    
-    
-async def count_per_page(index:int, per_page:int):
-    pass
 
 
 async def imcpVGG16(image: Images):
@@ -85,9 +82,7 @@ async def imcpYoLoBert(image: Images):
         raise HTTPException(status_code=404, detail="Image array is null!")
     
     try:
-        # image_name = await upload_image(image_bytes)
         caption = yolo_bert.generate_caption(image_rgb)
-        # await insert_user_data(image_rgb, image_name, caption)
     except Exception as ex:
         raise HTTPException(status_code=500, detail=f"Error in process image to create caption!\n {str(ex)}")
     
@@ -105,9 +100,7 @@ async def imcpYoLoGPT(image: Images):
         raise HTTPException(status_code=404, detail="Image array is null!")
     
     try:
-        # image_name = await upload_image(image_bytes)
         caption = yolo_gpt.predict_internet_caption(image_rgb)
-        # await insert_user_data(image_rgb, image_name, caption)
     except Exception as ex:
         raise HTTPException(status_code=500, detail=f"Error in process image to create caption!\n {str(ex)}")
     

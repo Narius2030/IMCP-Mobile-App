@@ -1,6 +1,6 @@
 # Swagger UI
 
-![image](https://github.com/user-attachments/assets/8827a046-8f53-43e5-8c14-607304f54c73)
+![image](https://github.com/user-attachments/assets/00c4c543-73f4-4740-bcb0-92848f4dca0c)
 
 
 

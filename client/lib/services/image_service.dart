@@ -20,14 +20,11 @@ class ImageService {
         case "VGG16 LSTM":
           lstmModel = "vgg16-lstm";
           break;
-        case "Yolo BERT LSTM":
-          lstmModel = "yolo8-bert-lstm";
-          break;
         case "Yolo GPT":
           lstmModel = "yolo8-gpt";
           break;
         default:
-          lstmModel = "yolo8-bert-lstm";
+          lstmModel = "vgg16-lstm";
           break;
       }
       log(lstmModel);

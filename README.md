@@ -28,4 +28,5 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ## Demo of mobile application
 
-![image](https://github.com/user-attachments/assets/9d0ef6cc-d816-49b5-af7b-c3fef1dac79c)
+![image](https://github.com/user-attachments/assets/c01c8783-1f26-43d3-8db1-14ecba9bcd52)
+

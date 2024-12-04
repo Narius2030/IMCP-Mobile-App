@@ -7,7 +7,7 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences #type: ignore
 from tensorflow.keras.layers import Input, Dense, LSTM, Embedding, Dropout, add, Flatten #type: ignore
 from tensorflow.keras.models import Model #type: ignore
 from utils.storage import MinioStorageOperator
-from utils.extractor import FeatureExtractorModel
+from utils.extractor import YOLOFeatureExtractorModel
 from utils.generator.load_models import ModelLoaders
 from core.config import get_settings
 
@@ -16,12 +16,12 @@ loader = ModelLoaders()
 minio_operator = MinioStorageOperator(endpoint=f'{settings.MINIO_HOST}:{settings.MINIO_PORT}', access_key=settings.MINIO_USER, secret_key=settings.MINIO_PASSWD)
 
 
-class YOLOGptGenerator(FeatureExtractorModel):
-    def __init__(self, bucket_name, file_path, model_path) -> None:
-        super().__init__(model_path)
+class YOLOGptGenerator(YOLOFeatureExtractorModel):
+    def __init__(self, bucket_name, file_path, backbone_path) -> None:
+        super().__init__(backbone_path)
         try:
             self.tokenizer = AutoTokenizer.from_pretrained("nlpconnect/vit-gpt2-image-captioning")
-            self.model = loader.load_gptmodel_from_minio(bucket_name, file_path)
+            self.model = loader.load_gptmodel_from_configs(bucket_name, file_path)
         except Exception as ex:
             raise ImportError(f"load model failed!\n {str(ex)}")
     
@@ -50,13 +50,13 @@ class YOLOGptGenerator(FeatureExtractorModel):
 
 
 
-class YOLOBertGenerator(FeatureExtractorModel):
+class YOLOBertGenerator(YOLOFeatureExtractorModel):
     def __init__(self, bucket_name, file_path, model_path) -> None:
         super().__init__(model_path)
         try:
             model = self.create_model(max_length=315, vocab_size=30522)
             self.tokenizer = BertTokenizer.from_pretrained(settings.BERT_TOKENIZERS)
-            self.yolo8_model = loader.load_h5model_from_minio(bucket_name, file_path, base_model=model)
+            self.yolo8_model = loader.load_h5model_from_weights(bucket_name, file_path, base_model=model)
         except Exception as ex:
             raise ImportError(f"load model failed!\n {str(ex)}")
     
@@ -225,8 +225,6 @@ class YOLOBertGenerator(FeatureExtractorModel):
         
         # Đảm bảo shape của ảnh là (1, height, width, channels)
         if image_rgb.ndim == 3:
-            # transformed_image = self.preprocess_image(image_rgb)
-            # feature_matrix = self.extract_features(transformed_image)
             feature_matrix = self.forward(image_rgb)
             print('HERE', feature_matrix.shape)
 

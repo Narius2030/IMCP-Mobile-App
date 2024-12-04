@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     MINIO_URL:str = os.getenv('MINIO_URL')
     # Tokenizer
     BERT_TOKENIZERS:str = os.getenv('BERT_TOKENIZERS')
+    LSTM_TOKENIZERS:str = os.getenv('LSTM_TOKENIZERS')
     
 def get_settings() -> Settings:
     return Settings()

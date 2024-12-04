@@ -105,21 +105,31 @@ class ImageService {
     }
   }
 
+  // String cleanCaption(String caption) {
+  //   String cleanedCaption = caption
+  //       .replaceAll(RegExp(r'[^a-zA-Z0-9\s.,!?\"]'), '') // Xóa ký tự đặc biệt
+  //       .replaceAll(RegExp(r'\s+'), ' ')
+  //       .trim();
+
+  //   List<String> words = cleanedCaption.split(' ');
+
+  //   if (words.length > 2) {
+  //     words.removeAt(0);
+  //     words.removeAt(words.length - 1);
+  //   } else {
+  //     return '';
+  //   }
+
+  //   return words.join(' ');
+  // }
+
   String cleanCaption(String caption) {
-    String cleanedCaption = caption
-        .replaceAll(RegExp(r'[^a-zA-Z0-9\s.,!?\"]'), '') // Xóa ký tự đặc biệt
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
+    // Use a regular expression to remove content within {}
+    String cleanedCaption = caption.replaceAll(RegExp(r'\{.*?\}'), '').trim();
 
-    List<String> words = cleanedCaption.split(' ');
+    // Replace multiple spaces with a single space
+    cleanedCaption = cleanedCaption.replaceAll(RegExp(r'\s+'), ' ');
 
-    if (words.length > 2) {
-      words.removeAt(0);
-      words.removeAt(words.length - 1);
-    } else {
-      return '';
-    }
-
-    return words.join(' ');
+    return cleanedCaption;
   }
 }

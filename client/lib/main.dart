@@ -38,7 +38,7 @@ class _ImcpAppState extends State<ImcpApp> {
     return baseTheme.copyWith(
       textTheme: GoogleFonts.quicksandTextTheme(baseTheme.textTheme).copyWith(
         bodyMedium: GoogleFonts.quicksand(
-          textStyle: TextStyle(fontWeight: FontWeight.w600),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600),
         ),
       ),
     );

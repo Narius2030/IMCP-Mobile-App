@@ -17,14 +17,14 @@ class ImageService {
       ImageModel imageModel, String lstmModel, CancelToken cancelToken) async {
     try {
       switch (lstmModel) {
-        case "VGG16 LSTM":
-          lstmModel = "vgg16-lstm";
+        case "VGG16LM":
+          lstmModel = "vgg16lm";
           break;
-        case "Yolo GPT":
-          lstmModel = "yolo8-gpt";
+        case "DarknetVG2":
+          lstmModel = "darknetvg2";
           break;
         default:
-          lstmModel = "vgg16-lstm";
+          lstmModel = "vgg16lm";
           break;
       }
       log(lstmModel);

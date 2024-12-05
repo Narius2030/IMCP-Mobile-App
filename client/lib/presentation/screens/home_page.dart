@@ -16,7 +16,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final lstmModel = ["VGG16 LSTM", "Yolo GPT"];
+  final lstmModel = ["VGG16LM", "DarknetVG2"];
   var chosenModel = "";
   final ImagePicker _picker = ImagePicker();
 

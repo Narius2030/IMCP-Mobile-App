@@ -1,10 +1,8 @@
 import 'dart:developer';
-
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:client/presentation/widgets/modals/caption_modal_bottom.dart';
 import 'package:client/core/utils/colors.dart';
 import 'package:client/presentation/widgets/model_wheel_picker.dart';
-import 'package:client/services/image_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,12 +16,46 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final lstmModel = ["VGG16 LSTM", "Yolo GPT"];
+  final lstmModel = ["VGG16LM", "DarknetVG2"];
   var chosenModel = "";
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
+  }
+
+  void openCaptionBottomSheet(XFile image) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      backgroundColor: const Color(0xFFFAF9F6),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      builder: (context) => CaptionModalBottom(
+        imagePreview: image,
+        chosenModel: chosenModel,
+      ),
+    );
+  }
+
+  Future<void> pickImageFromGallery() async {
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        if (chosenModel.isEmpty) {
+          chosenModel = lstmModel.first;
+        }
+        openCaptionBottomSheet(image);
+      }
+    } catch (e) {
+      log('Error picking image: $e');
+    }
   }
 
   @override
@@ -67,7 +99,7 @@ class _HomePageState extends State<HomePage> {
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: RawMaterialButton(
-                        onPressed: () {},
+                        onPressed: pickImageFromGallery,
                         elevation: 2.0,
                         fillColor: Colors.transparent.withOpacity(0.5),
                         padding: const EdgeInsets.all(15.0),
@@ -82,22 +114,24 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-              Builder(builder: (context) {
-                return Container(
-                  height: 40,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
-                  ),
-                  child: ModelWheelPicker(
-                    options: lstmModel,
-                    onValueChanged: (selected) {
-                      log('Selected model: $selected');
-                      chosenModel = selected;
-                    },
-                  ),
-                );
-              }),
+              Builder(
+                builder: (context) {
+                  return Container(
+                    height: 40,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                    ),
+                    child: ModelWheelPicker(
+                      options: lstmModel,
+                      onValueChanged: (selected) {
+                        log('Selected model: $selected');
+                        chosenModel = selected;
+                      },
+                    ),
+                  );
+                },
+              ),
             ],
           );
         },
@@ -109,25 +143,12 @@ class _HomePageState extends State<HomePage> {
               event.captureRequest.when(
                 single: (single) async {
                   if (chosenModel.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Please select a model"),
-                      ),
-                    );
-                    return;
+                    chosenModel = lstmModel.first;
                   }
 
                   XFile image = single.file!;
-                  showModalBottomSheet(
-                    context: context,
-                    elevation: 2.0,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (context) => CaptionModalBottom(
-                      imagePreview: image,
-                      chosenModel: chosenModel,
-                    ),
-                  );
+
+                  openCaptionBottomSheet(image);
                 },
               );
             case (MediaCaptureStatus.failure, true):

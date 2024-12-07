@@ -4,7 +4,7 @@ sys.path.append('./')
 from fastapi import status, APIRouter
 from fastapi.responses import JSONResponse
 from src.generation.models import Images, InsertUserData
-from src.generation.services import imcpVGG16, imcpYoLoBert, imcpYoLoGPT, ingestUserData
+from src.generation.services import imcpVGG16LM, imcpDarkNetLM, imcpDarkNetVG2, ingestUserData
 
 
 generation_router = APIRouter(
@@ -13,27 +13,27 @@ generation_router = APIRouter(
     responses={404: {"description":"Not Found"}}
 )
 
-@generation_router.get('/vgg16-lstm', status_code=status.HTTP_201_CREATED)
-async def imcp_vgg16(img: Images):
-    data = await imcpVGG16(img)
+@generation_router.post('/vgg16lm', status_code=status.HTTP_201_CREATED)
+async def imcp_vgg16lm(img: Images):
+    data = await imcpVGG16LM(img)
     payload = {
         "message": "SUCCESS",
         "predicted_caption": data
     }
     return JSONResponse(content=payload)
 
-@generation_router.get('/yolo8-bert-lstm', status_code=status.HTTP_201_CREATED)
-async def imcp_yolo_bert(img: Images):
-    data = await imcpYoLoBert(img)
+@generation_router.post('/darknetlm', status_code=status.HTTP_201_CREATED)
+async def imcp_darknetlm(img: Images):
+    data = await imcpDarkNetLM(img)
     payload = {
         "message": "SUCCESS",
         "predicted_caption": data
     }
     return JSONResponse(content=payload)
 
-@generation_router.get('/yolo8-gpt', status_code=status.HTTP_201_CREATED)
-async def imcp_yolo_gpt(img: Images):
-    data = await imcpYoLoGPT(img)
+@generation_router.post('/darknetvg2', status_code=status.HTTP_201_CREATED)
+async def imcp_darknetvg2(img: Images):
+    data = await imcpDarkNetVG2(img)
     payload = {
         "message": "SUCCESS",
         "predicted_caption": data
@@ -41,7 +41,7 @@ async def imcp_yolo_gpt(img: Images):
     return JSONResponse(content=payload)
 
 @generation_router.post('/ingest-user-data', status_code=status.HTTP_201_CREATED)
-async def imcp_yolo_gpt(user_data: InsertUserData):
+async def ingest_user_data(user_data: InsertUserData):
     data = await ingestUserData(user_data)
     payload = {
         "message": "SUCCESS",

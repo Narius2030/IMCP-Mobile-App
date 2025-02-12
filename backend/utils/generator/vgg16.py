@@ -1,10 +1,13 @@
+import sys
+sys.path.append('./')
+
 import pickle
 import numpy as np
 import sys
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras import preprocessing
 sys.modules['keras.src.preprocessing'] = preprocessing
-from utils.storage import MinioStorageOperator
+from utils.operators.storage import MinioStorageOperator
 from utils.generator.load_models import ModelLoaders
 from utils.extractor import VGG16FeatureExtractorModel
 from core.config import get_settings

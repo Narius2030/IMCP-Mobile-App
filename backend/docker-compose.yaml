@@ -1,41 +1,46 @@
-version: "3.9"
+version: '3.9'
 
 services:
-  minio:
-    hostname: minio
-    image: "minio/minio"
-    container_name: minio
+  nginx:
+    image: nginx:latest
+    container_name: nginx-gateway
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
-      - "9001:9001"
-      - "9000:9000"
-    command: [ "server", "/data", "--console-address", ":9001" ]
-    volumes:
-      - ./data/miniodata:/data
-    env_file:
-      - .env
+      - "80:80"
+    depends_on:
+      - metadata-service
+      # - model-service
     networks:
       - data_network
-  
-  mc:
-    image: minio/mc
-    container_name: mc
-    hostname: mc
-    env_file:
-      - .env
+
+  metadata-service:
+    build: ./src/metadata
+    container_name: metadata-service
     volumes:
-      - ./data:/data
-    entrypoint: >
-      /bin/sh -c " until (/usr/bin/mc config host add minio http://minio:9000/ minio minio123) do echo '...waiting...' && sleep 10; done; /usr/bin/mc mb minio/mlflow; tail -f /dev/null;"
-    depends_on:     
-      - minio
+      - ./utils:/app/utils
+      - ./core:/app/core
+    env_file:
+      - ./.env
+    # expose:
+    #   - "8000"
     networks:
       - data_network
+
+  # model-service:
+  #   build: ./src/model
+  #   container_name: model-service
+  #   # expose:
+  #   #   - "8000"
+  #   volumes:
+  #     - ./utils:/app/utils
+  #   env_file:
+  #     - ./.env
+  #   networks:
+  #     - data_network
+
 
 networks:
   data_network:
     driver: bridge
     name: data_network
-
-volumes:
-  postgres_data_h: {}
-  miniodata: {}

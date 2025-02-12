@@ -13,7 +13,7 @@ def send_request():
     }
     
     header = {
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik5oYW5CdWkiLCJwYXNzd29yZCI6IiQyYiQxMiRiemhQcVF2b0J4Q3NjNDJRWGV2OEl1QWZiL1NKd3U4Umxqc0xuM1dtYXdKSUdmTkZCNlFaZSIsImV4cCI6MTczMTc1MjA2MX0.ngsSRaDRhMYL9nU7FCvciaJ41thl1TRX_-7t55F7rYk'
+        'Authorization': 'Bearer <YOUR-TOKEN>'
     }
     
     resp = requests.request(method='GET', url='http://116.118.50.253:80/api/v1/metadata/full', params=payload, headers=header)

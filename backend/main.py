@@ -1,30 +1,32 @@
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-from src.users.routes import user_router
-from src.auth.routes import auth_router
-from src.captions.routes import caption_router
-from src.generation.routes import generation_router
-from starlette.middleware.authentication import AuthenticationMiddleware
-from starlette.middleware.cors import CORSMiddleware
-from core.security import JWTAuth
+import requests
+# import base64
+# import numpy as np
+# import cv2
+# from PIL import Image
+# from core.config import get_settings
 
-app = FastAPI(docs_url='/docs')
-app.include_router(auth_router)
-app.include_router(user_router)
-app.include_router(caption_router)
-app.include_router(generation_router)
+# Bên Phú
+def send_request():
+    payload = {
+        "page": 1,
+        "per_page": 1
+    }
+    
+    header = {
+        'Authorization': 'Bearer <YOUR-TOKEN>'
+    }
+    
+    resp = requests.request(method='GET', url='http://116.118.50.253:80/api/v1/metadata/full', params=payload, headers=header)
+    print(resp.json()[0])
+    # resp = requests.request(method='POST', url='http://116.118.50.253:8000/api/v1/generation/yolo8-gpt', json=payload)
+    # print(resp.content)
+    # resp = requests.request(method='POST', url='http://localhost:8000/api/v1/generation/ingest-user-data', json=payload)
+    # print(resp.content)
+    # resp = requests.request(method='GET', url='http://localhost:8000/api/v1/generation/vgg16-lstm', json=payload)
+    # print(resp.content)
 
-# Add Middleware
-origins = ['*']
-app.add_middleware(AuthenticationMiddleware, backend=JWTAuth())
-app.add_middleware( 
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
-)
 
-@app.get('/')
-def health_check():
-    return JSONResponse(content={'status':'running'})
+
+if __name__ == '__main__':
+    send_request()
+    

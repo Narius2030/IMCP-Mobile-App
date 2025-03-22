@@ -6,7 +6,7 @@ from transformers import AutoTokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences #type: ignore
 from tensorflow.keras.layers import Input, Dense, LSTM, Embedding, Dropout, add, Flatten #type: ignore
 from tensorflow.keras.models import Model #type: ignore
-from utils.storage import MinioStorageOperator
+from utils.operators.storage import MinioStorageOperator
 from utils.extractor import YOLOFeatureExtractorModel
 from utils.generator.load_models import ModelLoaders
 from core.config import get_settings

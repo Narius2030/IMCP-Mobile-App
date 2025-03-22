@@ -2,4 +2,5 @@
 /.env
 /temp.py
 /*.ipynb
+/__pycache__
 /utils/lstm-tokenizer-files/*.h5

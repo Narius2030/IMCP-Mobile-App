@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     MINIO_USER:str = os.getenv('MINIO_USER')
     MINIO_PASSWD:str = os.getenv('MINIO_PASSWD')
     MINIO_URL:str = os.getenv('MINIO_URL')
+    # Trino
+    TRINO_USER:str = os.getenv('TRINO_USER')
+    TRINO_HOST:str = os.getenv('TRINO_HOST')
+    TRINO_PORT:str = os.getenv('TRINO_PORT')
+    TRINO_CATALOG:str = os.getenv('TRINO_CATALOG')
     # Tokenizer
     BERT_TOKENIZERS:str = os.getenv('BERT_TOKENIZERS')
     LSTM_TOKENIZERS:str = os.getenv('LSTM_TOKENIZERS')

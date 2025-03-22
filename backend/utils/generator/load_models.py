@@ -1,3 +1,6 @@
+import sys
+sys.path.append('./')
+
 import tempfile
 import os
 from core.config import get_settings
@@ -5,7 +8,7 @@ from transformers import VisionEncoderDecoderModel
 from tensorflow.keras.models import load_model
 from tensorflow.keras.utils import custom_object_scope
 from tensorflow.keras.initializers import Orthogonal
-from utils.storage import MinioStorageOperator
+from utils.operators.storage import MinioStorageOperator
 from utils.extractor import CustomLSTM
 
 settings = get_settings()

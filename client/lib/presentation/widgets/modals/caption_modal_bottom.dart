@@ -17,12 +17,10 @@ import 'dart:math' as math;
 
 class CaptionModalBottom extends StatefulWidget {
   final XFile imagePreview;
-  final String chosenModel;
 
   const CaptionModalBottom({
     super.key,
     required this.imagePreview,
-    required this.chosenModel,
   });
 
   @override
@@ -46,7 +44,6 @@ class _CaptionModalBottomState extends State<CaptionModalBottom> {
       var imageModel = await imageService.getImageModel(widget.imagePreview);
       var response = await imageService.getImageCaption(
         imageModel,
-        widget.chosenModel,
         cancelToken,
       );
       String caption = response["predicted_caption"];

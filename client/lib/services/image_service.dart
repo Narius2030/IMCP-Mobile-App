@@ -14,21 +14,9 @@ class ImageService {
   final dio = Dio();
 
   Future<Map<String, dynamic>> getImageCaption(
-      ImageModel imageModel, String lstmModel, CancelToken cancelToken) async {
+      ImageModel imageModel, CancelToken cancelToken) async {
     try {
-      switch (lstmModel) {
-        case "VGG16LM":
-          lstmModel = "vgg16lm";
-          break;
-        case "DarknetVG2":
-          lstmModel = "darknetvg2";
-          break;
-        default:
-          lstmModel = "vgg16lm";
-          break;
-      }
-      log(lstmModel);
-      var url = "${AppConstants.API_GENERATE_CAPTION}/$lstmModel";
+      var url = "${AppConstants.API_GENERATE_CAPTION}/model/predict-caption";
       final response = await dio.post(
         url,
         data: imageModel.toJson(),
@@ -91,7 +79,7 @@ class ImageService {
   Future<void> saveUserData(
       ImageModel imageModel, String caption, CancelToken cancelToken) async {
     try {
-      var url = "${AppConstants.API_GENERATE_CAPTION}/ingest-user-data";
+      var url = "${AppConstants.API_GENERATE_CAPTION}/model/ingest-user-data";
       await dio.post(
         url,
         data: {

@@ -6,7 +6,6 @@ from core.config import Settings
 from contextlib import closing
 import trino
 import time
-import polars as pl
 
 
 class SQLOperators:
@@ -32,18 +31,22 @@ class SQLOperators:
         except Exception as ex:
             raise Exception(f"====> Can't execute query: {query} - {str(ex)}")
     
-    def get_latest_fetching_time(self, table_name, schema, finished_time, dag_name):
-        audit = self.get_dataframe_from_database(query=f'''SELECT * FROM {schema}.{table_name}''')
-        latest_time = audit.filter(
-            pl.col('status').str.to_uppercase() == 'SUCCESS',
-            pl.col('dag') == dag_name
-        ).select(
-            pl.col(finished_time).max()
-        ).to_dicts()[0][finished_time]
-        return latest_time
+    def get_latest_fetching_time(self, layer, table_name):
+        query = f"""
+            SELECT MAX(end_time) 
+            FROM audit
+            WHERE status='SUCCESS' AND layer='{layer}' AND table_name='{table_name}'
+        """
+        try:
+            with closing(self.__dbconn.cursor()) as cursor:
+                cursor.execute(query)
+                latest_time = cursor.fetchone()
+                return latest_time[0]
+        except Exception as ex:
+            raise Exception(f"====> Can't execute {query} - {str(ex)}")
     
-    def data_generator(self, table_name, columns, batch_size=10000):
-        query = QueryTemplate(table_name).create_query_select(columns)
+    def data_generator(self, table_name, columns, latest_time="1970-01-01T00:00:00.000+00:00", batch_size=10000):
+        query = QueryTemplate(table_name).create_query_select(columns, latest_time)
         try:
             batch = []
             with closing(self.__dbconn.cursor()) as cursor:

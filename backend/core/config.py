@@ -9,6 +9,9 @@ load_dotenv(dotenv_path=env_path)
 class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = os.getenv('MONGO_ATLAS_PYTHON')
+    # Kafka
+    KAFKA_ADDRESS:str = os.getenv('KAFKA_ADDRESS')
+    KAFKA_PORT:str = os.getenv('KAFKA_PORT')
     # JWT 
     JWT_SECRET: str = os.getenv('JWT_SECRET')
     JWT_ALGORITHM: str = os.getenv('JWT_ALGORITHM')
@@ -24,9 +27,6 @@ class Settings(BaseSettings):
     TRINO_HOST:str = os.getenv('TRINO_HOST')
     TRINO_PORT:str = os.getenv('TRINO_PORT')
     TRINO_CATALOG:str = os.getenv('TRINO_CATALOG')
-    # Tokenizer
-    BERT_TOKENIZERS:str = os.getenv('BERT_TOKENIZERS')
-    LSTM_TOKENIZERS:str = os.getenv('LSTM_TOKENIZERS')
     
 def get_settings() -> Settings:
     return Settings()

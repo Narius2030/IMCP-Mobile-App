@@ -1,0 +1,125 @@
+import mlflow
+from mlflow.tracking import MlflowClient
+from minio import Minio
+from fastapi import FastAPI, UploadFile, File
+import os
+import pickle
+
+# Initialize MLflow client
+client = MlflowClient()
+
+# Initialize MinIO client (replace with your MinIO credentials and endpoint)
+minio_client = Minio(
+    "localhost:9000",  # Replace with your MinIO server endpoint
+    access_key="minio",  # Replace with your MinIO access key
+    secret_key="minio_secret_key",  # Replace with your MinIO secret key
+    secure=False  # Set to True if using HTTPS
+)
+
+# Initialize FastAPI app
+app = FastAPI()
+
+def get_latest_run_id(experiment_name):
+    """
+    Retrieve the latest run_id from the specified MLflow experiment.
+    
+    Args:
+        experiment_name (str): Name of the MLflow experiment.
+    
+    Returns:
+        str: The latest run_id.
+    
+    Raises:
+        ValueError: If the experiment or runs are not found.
+    """
+    experiment = client.get_experiment_by_name(experiment_name)
+    if not experiment:
+        raise ValueError(f"Experiment '{experiment_name}' not found.")
+    
+    runs = client.search_runs(
+        experiment_ids=[experiment.experiment_id],
+        order_by=["start_time DESC"],
+        max_results=1
+    )
+    if not runs:
+        raise ValueError(f"No runs found in experiment '{experiment_name}'.")
+    
+    return runs[0].info.run_id
+
+def get_model_path(run_id, bucket_name):
+    """
+    Construct the MinIO path for the model artifact.
+    
+    Args:
+        run_id (str): The MLflow run_id.
+        bucket_name (str): The MinIO bucket name.
+    
+    Returns:
+        str: The MinIO path to the model.
+    """
+    return f"{run_id}/artifacts/model/model.pkl"  # Adjust path based on your artifact structure
+
+def load_model_from_minio(run_id, bucket_name):
+    """
+    Load the latest model from MinIO.
+    
+    Args:
+        run_id (str): The MLflow run_id.
+        bucket_name (str): The MinIO bucket name.
+    
+    Returns:
+        object: The loaded model.
+    """
+    model_path = get_model_path(run_id, bucket_name)
+    local_model_path = f"/tmp/{run_id}_model.pkl"  # Temporary local path
+    
+    # Download the model file from MinIO
+    minio_client.fget_object(
+        bucket_name=bucket_name,
+        object_name=model_path,
+        file_path=local_model_path
+    )
+    
+    # Load the model (assuming it’s a pickle file; adjust for your model format)
+    with open(local_model_path, "rb") as f:
+        model = pickle.load(f)
+    
+    # Clean up temporary file
+    os.remove(local_model_path)
+    return model
+
+@app.post("/generate-image")
+async def generate_image(file: UploadFile = File(...)):
+    """
+    FastAPI endpoint to generate an image using the latest model version.
+    
+    Args:
+        file (UploadFile): The image file uploaded from the mobile app.
+    
+    Returns:
+        dict: Response with a success message and run_id.
+    """
+    # Specify your experiment name and bucket name
+    experiment_name = "your_experiment_name"  # Replace with your MLflow experiment name
+    bucket_name = "your_bucket_name"  # Replace with your MinIO bucket name
+    
+    # Get the latest run_id
+    latest_run_id = get_latest_run_id(experiment_name)
+    
+    # Load the latest model from MinIO
+    model = load_model_from_minio(latest_run_id, bucket_name)
+    
+    # Process the uploaded image with the model
+    # (Replace this with your actual model inference logic)
+    image_data = await file.read()  # Read the image file
+    # Example: result = model.predict(image_data)
+    # For demonstration, we’ll return a placeholder response
+    result = "Generated image"  # Replace with actual output
+    
+    return {
+        "message": f"Image generated successfully using model from run_id: {latest_run_id}",
+        "result": result
+    }
+
+# To run the FastAPI app locally:
+# uvicorn script_name:app --host 0.0.0.0 --port 8000 --reload

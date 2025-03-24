@@ -12,10 +12,12 @@ motor
 python-multipart
 numpy
 pillow
-tensorflow==2.16.1
 torch==2.4.0
 torchvision==0.19.0
-ultralytics==8.3.29
 keras==3.3.3
 transformers
 minio
+trino
+polars
+confluent_kafka
+kafka-python

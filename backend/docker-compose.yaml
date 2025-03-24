@@ -10,7 +10,7 @@ services:
       - "80:80"
     depends_on:
       - metadata-service
-      # - model-service
+      - model-service
     networks:
       - data_network
 
@@ -22,22 +22,19 @@ services:
       - ./core:/app/core
     env_file:
       - ./.env
-    # expose:
-    #   - "8000"
     networks:
       - data_network
 
-  # model-service:
-  #   build: ./src/model
-  #   container_name: model-service
-  #   # expose:
-  #   #   - "8000"
-  #   volumes:
-  #     - ./utils:/app/utils
-  #   env_file:
-  #     - ./.env
-  #   networks:
-  #     - data_network
+  model-service:
+    build: ./src/model
+    container_name: model-service
+    volumes:
+    - ./utils:/app/utils
+    - ./core/config:/app/core
+    env_file:
+      - ./.env
+    networks:
+      - data_network
 
 
 networks:

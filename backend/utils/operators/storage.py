@@ -20,7 +20,17 @@ class MinioStorageOperator:
             secret_key=secret_key,
             secure=secure  # Đặt thành True nếu dùng HTTPS
         )
-
+    
+    def get_list_objects(self, bucket_name:str, partition:str=""):
+        try:
+            files = []
+            objects = self.client.list_objects(bucket_name, prefix=f"encoded-data/{partition}", recursive=True)
+            for obj in objects:
+                files.append(obj)
+            return files
+        except S3Error as err:
+            print(f"Error listing objects: {err}")
+    
     def upload_file(self, bucket_name, object_name, file_path):
         """
         Upload tệp lên MinIO.
@@ -76,7 +86,7 @@ class MinioStorageOperator:
             object_name=object_name
         )
         
-    def load_object_bytes(self, bucket_name, object_name, version_id=None):
+    def get_object_bytes(self, bucket_name, object_name, version_id=None):
         """
         Get object in stream bytes from MinIO.
 
@@ -86,6 +96,7 @@ class MinioStorageOperator:
             # Lấy đối tượng từ MinIO dưới dạng byte stream
             response  = self.client.get_object(bucket_name, object_name, version_id=version_id)
             data = response.read()
+            response.close()
             return data
         except S3Error as err:
             print(f"Error loading file: {err}")

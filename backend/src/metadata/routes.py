@@ -1,18 +1,17 @@
 import sys
 sys.path.append('./')
 
-from fastapi import status, APIRouter, Depends
-from services import getCaptionTokens, getOnlyTokens, getOnlyTexts
-from core.security import oauth2_scheme
+from fastapi import status, APIRouter, Body
+from services import getMetadata, getEncodedFiles, getLatestEncodedFiles
+from typing import Optional
 import logging
 
 
 # router
-metadata_router = APIRouter(
+caption_router = APIRouter(
     prefix="/api/v1/metadata",
     tags=["Metadata"],
-    responses={404: {"description": "Not found"}},
-    dependencies=[Depends(oauth2_scheme)]
+    responses={404: {"description": "Not found"}}
 )
 
 
@@ -21,31 +20,23 @@ logger = logging.getLogger("uvicorn")
 
 
 # Get text + token for caption and short_caption
-@metadata_router.get("/full", status_code=status.HTTP_200_OK)
-async def get_caption_tokens(page:int, per_page:int):
-    data = await getCaptionTokens(page, per_page)
+@caption_router.post("/metadata", status_code=status.HTTP_200_OK)
+async def get_caption_tokens(
+    latest_time:Optional[str] = Body(default="1970-01-01T00:00:00.000+00:00", 
+                                     examples=["1970-01-01T00:00:00.000+00:00"])
+):
+    data = await getMetadata(latest_time)
     logger.info(f'========== Fetched successfully texts-tokens: {len(data)} ==========')
     return data
 
-
-# Get only token for caption and short_caption
-@metadata_router.get("/onlytok", status_code=status.HTTP_200_OK)
-async def get_tokens(page:int, per_page:int):
-    data = await getOnlyTokens(page, per_page)
-    logger.info(f'========== Fetched successfully tokens: {len(data)} ==========')
+@caption_router.get("/encoded-data", status_code=status.HTTP_200_OK)
+async def get_encoded_files():
+    data = await getLatestEncodedFiles()
+    logger.info(f'========== Fetched successfully: {data["object_keys"]} ==========')
     return data
 
-
-# Get only text for caption and short_caption
-@metadata_router.get("/onlycap", status_code=status.HTTP_200_OK)
-async def get_texts(page:int, per_page:int):
-    data = await getOnlyTexts(page, per_page)
-    logger.info(f'========== Fetched successfully caption texts: {len(data)} ==========')
+@caption_router.post("/encoded-data", status_code=status.HTTP_200_OK)
+async def get_encoded_files(partitions:list[str]=Body(...)):
+    data = await getEncodedFiles(partitions)
+    logger.info(f'========== Fetched successfully: {data["object_keys"]} ==========')
     return data
-
-
-# @metadata_router.get("/mobile/text-tokens", status_code=status.HTTP_200_OK)
-# async def get_caption_tokens_mobile(page:int, per_page:int):
-#     data = await getLatestCaption(page, per_page)
-#     logger.info(f'========== Fetched successfully texts-tokens: {len(data)} ==========')
-#     return data

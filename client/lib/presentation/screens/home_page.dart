@@ -16,8 +16,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final lstmModel = ["VGG16LM", "DarknetVG2"];
-  var chosenModel = "";
   final ImagePicker _picker = ImagePicker();
 
   @override
@@ -39,7 +37,6 @@ class _HomePageState extends State<HomePage> {
       ),
       builder: (context) => CaptionModalBottom(
         imagePreview: image,
-        chosenModel: chosenModel,
       ),
     );
   }
@@ -48,9 +45,6 @@ class _HomePageState extends State<HomePage> {
     try {
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
       if (image != null) {
-        if (chosenModel.isEmpty) {
-          chosenModel = lstmModel.first;
-        }
         openCaptionBottomSheet(image);
       }
     } catch (e) {
@@ -114,24 +108,24 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-              Builder(
-                builder: (context) {
-                  return Container(
-                    height: 40,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.5),
-                    ),
-                    child: ModelWheelPicker(
-                      options: lstmModel,
-                      onValueChanged: (selected) {
-                        log('Selected model: $selected');
-                        chosenModel = selected;
-                      },
-                    ),
-                  );
-                },
-              ),
+              // Builder(
+              //   builder: (context) {
+              //     return Container(
+              //       height: 40,
+              //       width: double.infinity,
+              //       decoration: BoxDecoration(
+              //         color: Colors.black.withOpacity(0.5),
+              //       ),
+              //       child: ModelWheelPicker(
+              //         options: lstmModel,
+              //         onValueChanged: (selected) {
+              //           log('Selected model: $selected');
+              //           chosenModel = selected;
+              //         },
+              //       ),
+              //     );
+              //   },
+              // ),
             ],
           );
         },
@@ -142,10 +136,6 @@ class _HomePageState extends State<HomePage> {
             case (MediaCaptureStatus.success, true):
               event.captureRequest.when(
                 single: (single) async {
-                  if (chosenModel.isEmpty) {
-                    chosenModel = lstmModel.first;
-                  }
-
                   XFile image = single.file!;
 
                   openCaptionBottomSheet(image);

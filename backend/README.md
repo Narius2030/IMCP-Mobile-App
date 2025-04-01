@@ -1,7 +1,3 @@
-# Swagger UI
-
-![image](https://github.com/user-attachments/assets/8827a046-8f53-43e5-8c14-607304f54c73)
-
 # Application Architecture
 
 ![image](https://github.com/user-attachments/assets/2f49ba20-5926-4e5a-b921-12c1389a27fa)
@@ -31,6 +27,50 @@ server {
         }
 }
 ```
+
+- Configure Model Service Container
+
+```Dockerfile
+# Use Python 3.11 as the base image
+FROM python:3.11-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the necessary files into the container
+COPY . .
+
+# Install the required libraries
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Install the cv2 dependencies that might be missing in the Docker container 
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
+
+# Start FastAPI when the container is launched
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+- Configure Metadata Service Container
+
+```Dockerfile
+# Use Python 3.11 as the base image
+FROM python:3.11-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the necessary files into the container
+COPY . .
+
+# Install the required libraries
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Start FastAPI when the container is launched
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
 
 # Containerizing project
 

@@ -10,12 +10,11 @@ For containerizing the backend, I configured these containers. Furthermore, Our 
 
 - Metadata Service
 
-![image](https://github.com/user-attachments/assets/df2f10e0-93bc-470d-9927-b301e96cddf7)
+![image](https://github.com/user-attachments/assets/4c25e000-0cd4-407e-854d-66f1d88ccab3)
 
 - Model Service
 
-![image](https://github.com/user-attachments/assets/03363793-4a2f-4d26-9af0-0ea88146d6a0)
-
+![image](https://github.com/user-attachments/assets/498ad9be-c67a-49fc-8ed5-33933d14394e)
 
 - Build all up
 

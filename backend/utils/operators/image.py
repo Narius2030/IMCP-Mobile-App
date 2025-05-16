@@ -1,14 +1,31 @@
 import cv2
-import torch
 import requests
+import logging
 import numpy as np
-from PIL import Image
 from transformers import ViTImageProcessor, AutoTokenizer
 from utils.operators.load_models import ModelLoaders
 
 
 class ImageOperator:
+    """
+    A class for handling image operations including loading and caption generation.
+    
+    This class provides functionality to load images from bytes and generate captions
+    using a pre-trained model. It uses ViT for image feature extraction and BART for
+    caption generation.
+    """
+    
     def __init__(self, bucket_name, model_path) -> None:
+        """
+        Initialize the ImageOperator with model configurations.
+        
+        Args:
+            bucket_name (str): Name of the bucket containing model configurations
+            model_path (str): Path to the model within the bucket
+            
+        Raises:
+            ImportError: If model loading fails
+        """
         try:
             self.bucket_name = bucket_name
             self.model_path = model_path
@@ -20,6 +37,18 @@ class ImageOperator:
     
     
     def load_image(self, image_bytes):
+        """
+        Load and preprocess an image from bytes.
+        
+        Args:
+            image_bytes (bytes): Raw image data in bytes format
+            
+        Returns:
+            numpy.ndarray: Preprocessed RGB image array, or None if loading fails
+            
+        Note:
+            The image is converted from BGR (OpenCV default) to RGB format
+        """
         try:
             # Chuyển nội dung về mảng numpy
             image_array = np.asarray(bytearray(image_bytes), dtype=np.uint8)
@@ -40,49 +69,49 @@ class ImageOperator:
 
 
     def predict_caption(self, image_bytes):
+        """
+        Generate a caption for the input image.
+        
+        Args:
+            image_bytes (bytes): Raw image data in bytes format
+            
+        Returns:
+            str: Generated caption for the image
+            
+        Note:
+            The caption generation uses beam search with specific parameters for
+            controlling length, diversity, and repetition.
+        """
         # Load tokenizer của BartPho
         pixel_values =  self.feature_extractor(self.load_image(image_bytes), return_tensors="pt")["pixel_values"]
         print("Featured values shape: ", pixel_values.shape)
         output_ids = self.model.generate(
-                    pixel_values
-                    ,max_length=250
-                    ,min_length=100
-                    ,num_beams = 5
-                    ,early_stopping=True
-                    ,pad_token_id=self.tokenizer.eos_token_id
+                    pixel_values,
+                    max_length=150,  # +2 to account for BOS and new token
+                    min_length=50,
+                    num_beams=4,
+                    do_sample=True,
+                    temperature=0.8,  # Giảm nhiệt độ
+                    top_k=20,
+                    top_p=0.9,  # Mở rộng lựa chọn từ
+                    no_repeat_ngram_size=3,  # Ngăn lặp cụm 5 từ
+                    repetition_penalty=2.0,  # Phạt lặp mạnh hơn
+                    early_stopping=True,
+                    pad_token_id=self.tokenizer.eos_token_id,
+                    eos_token_id=self.tokenizer.eos_token_id,
+                    decoder_start_token_id=self.tokenizer.bos_token_id
                 )
         caption = self.tokenizer.decode(output_ids[0], skip_special_tokens=True)
-        yield caption
-    
-    # def predict_caption(self, image_bytes):
-    #     # ... existing code ...
-    #     pixel_values = self.feature_extractor(self.load_image(image_bytes), return_tensors="pt")["pixel_values"]
-    #     print("Featured values shape: ", pixel_values.shape)
+        normalized_caption = re.split(r'[ _]', caption)
+        # concatenate '.' with forward word
+        final_caption_words = list()
+        for idx, word in enumerate(normalized_caption):
+            if word == '.' and final_caption_words:
+                final_caption_words[-1] = normalized_caption[idx-1] + word
+            else:
+                final_caption_words.append(word)
+        # unify to a string
+        final_caption = ' '.join(final_caption_words)
+        logging.info(f"CAPTION: {type(final_caption)} - {final_caption}")
         
-    #     # Initialize with just the beginning of sequence
-    #     generated_ids = [self.tokenizer.bos_token_id]
-        
-    #     # Generate one token at a time
-    #     for _ in range(150):  # max_length as before
-    #         outputs = self.model.generate(
-    #             pixel_values,
-    #             max_length=len(generated_ids) + 2,  # +2 to account for BOS and new token
-    #             min_length=1,
-    #             num_beams=3,  # Use greedy decoding for streaming
-    #             early_stopping=True,
-    #             pad_token_id=self.tokenizer.eos_token_id,
-    #             decoder_input_ids=torch.tensor([generated_ids]) if generated_ids else None,
-    #             use_cache=True
-    #         )
-            
-    #         next_token = outputs[0][-1]
-    #         generated_ids.append(next_token.item())
-            
-    #         # Decode the current token
-    #         current_word = self.tokenizer.decode([next_token], skip_special_tokens=True)
-    #         if current_word.strip():  # Only yield non-empty strings
-    #             yield current_word
-            
-    #         # Check if we've hit the end token
-    #         if next_token == self.tokenizer.eos_token_id:
-    #             break
+        return final_caption

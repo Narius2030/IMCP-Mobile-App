@@ -1,18 +1,18 @@
-# Sử dụng Python 3.11 làm image cơ sở
+# Use Python 3.11 as the base image
 FROM python:3.11-slim
 
-# Thiết lập thư mục làm việc
+# Set the working directory
 WORKDIR /app
 
-# Sao chép các file cần thiết vào container
+# Copy the necessary files into the container
 COPY . .
 
-# Cài đặt các thư viện cần thiết
+# Install the required libraries
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Install the cv2 dependencies that might be missing in  Docker container 
+# Install the cv2 dependencies that might be missing in the Docker container 
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
-# Khởi chạy FastAPI khi container được khởi động
+# Start FastAPI when the container is launched
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

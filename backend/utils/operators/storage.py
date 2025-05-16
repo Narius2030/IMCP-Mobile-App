@@ -7,24 +7,44 @@ import os
 class MinioStorageOperator:
     def __init__(self, endpoint, access_key, secret_key, secure=False):
         """
-        Khởi tạo kết nối với MinIO.
-        
-        :param endpoint: Địa chỉ máy chủ MinIO (host:port).
-        :param access_key: Khóa truy cập MinIO.
-        :param secret_key: Khóa bí mật MinIO.
-        :param secure: Sử dụng HTTPS (mặc định là True).
+        Initialize a connection to MinIO storage service.
+
+        Args:
+            endpoint (str): MinIO server endpoint in format 'host:port'.
+            access_key (str): MinIO access key for authentication.
+            secret_key (str): MinIO secret key for authentication.
+            secure (bool, optional): Whether to use HTTPS for the connection. Defaults to False.
+
+        Note:
+            The Minio client is initialized with the provided credentials and stored in the instance.
+            Set secure=True if you need to use HTTPS for the connection.
         """
         self.client = Minio(
             endpoint=endpoint,
             access_key=access_key,
             secret_key=secret_key,
-            secure=secure  # Đặt thành True nếu dùng HTTPS
+            secure=secure
         )
     
     def get_list_objects(self, bucket_name:str, partition:str=""):
+        """
+        Retrieve a list of objects from a specified MinIO bucket and partition.
+
+        Args:
+            bucket_name (str): Name of the MinIO bucket to list objects from.
+            partition (str, optional): Partition path within the bucket. Defaults to empty string.
+                Objects will be listed under the path 'imcp/encoded-data/{partition}'.
+
+        Returns:
+            list: A list of MinIO objects found in the specified bucket and partition.
+
+        Note:
+            The function recursively lists all objects under the specified partition path.
+            If an error occurs during listing, it will print the error message.
+        """
         try:
             files = []
-            objects = self.client.list_objects(bucket_name, prefix=f"encoded-data/{partition}", recursive=True)
+            objects = self.client.list_objects(bucket_name, prefix=f"imcp/encoded-data/{partition}", recursive=True)
             for obj in objects:
                 files.append(obj)
             return files
@@ -33,11 +53,15 @@ class MinioStorageOperator:
     
     def upload_file(self, bucket_name, object_name, file_path):
         """
-        Upload tệp lên MinIO.
+        Upload a file to MinIO storage.
 
-        :param bucket_name: Tên bucket trong MinIO.
-        :param file_path: Đường dẫn đến tệp cần upload.
-        :param object_name: Tên đối tượng sẽ lưu trên MinIO.
+        Args:
+            bucket_name (str): Name of the MinIO bucket to upload to.
+            object_name (str): Name of the object to be stored in MinIO.
+            file_path (str): Path to the local file to be uploaded.
+
+        Note:
+            Prints success message if upload is successful, or error message if upload fails.
         """
         try:
             self.client.fput_object(bucket_name, object_name, file_path)
@@ -47,11 +71,18 @@ class MinioStorageOperator:
 
     def download_file(self, bucket_name, object_name, download_path, version_id=None):
         """
-        Download tệp từ MinIO về máy.
+        Download a file from MinIO storage to the local machine.
 
-        :param bucket_name: Tên bucket trong MinIO.
-        :param object_name: Tên đối tượng trên MinIO cần tải về.
-        :param download_path: Đường dẫn lưu tệp tải về.
+        Args:
+            bucket_name (str): Name of the MinIO bucket containing the file.
+            object_name (str): Name/path of the object to download from MinIO.
+            download_path (str): Local file path where the downloaded file will be saved.
+            version_id (str, optional): Specific version ID of the object to download. 
+                                      If None, downloads the latest version.
+
+        Note:
+            Prints a success message if the download is successful, or an error message if the download fails.
+            Uses MinIO's fget_object method to perform the download operation.
         """
         try:
             self.client.fget_object(bucket_name, object_name, download_path, version_id=version_id)
@@ -61,9 +92,14 @@ class MinioStorageOperator:
 
     def create_bucket(self, bucket_name):
         """
-        Tạo bucket trong MinIO nếu chưa tồn tại.
+        Create a new bucket in MinIO storage if it doesn't already exist.
 
-        :param bucket_name: Tên bucket cần tạo.
+        Args:
+            bucket_name (str): Name of the bucket to create.
+
+        Note:
+            Prints a success message if the bucket is created, or a message if it already exists.
+            Prints an error message if bucket creation fails.
         """
         try:
             if not self.client.bucket_exists(bucket_name):
@@ -76,9 +112,14 @@ class MinioStorageOperator:
     
     def create_presigned_url(self, bucket_name, object_name) -> str:
         """
-        Create new *Presigned URL* in MinIO.
+        Generate a presigned URL for accessing an object in MinIO storage.
 
-        :param bucket_name: Name of bucket containing that object.
+        Args:
+            bucket_name (str): Name of the bucket containing the object.
+            object_name (str): Name/path of the object to generate URL for.
+
+        Returns:
+            str: A presigned URL that can be used to access the object.
         """
         return self.client.get_presigned_url(
             method='GET',
@@ -88,13 +129,22 @@ class MinioStorageOperator:
         
     def get_object_bytes(self, bucket_name, object_name, version_id=None):
         """
-        Get object in stream bytes from MinIO.
+        Retrieve an object from MinIO storage as a byte stream.
 
-        :param bucket_name: Name of bucket containing that object.
+        Args:
+            bucket_name (str): Name of the bucket containing the object.
+            object_name (str): Name/path of the object to retrieve.
+            version_id (str, optional): Specific version ID of the object to retrieve.
+                                      If None, retrieves the latest version.
+
+        Returns:
+            bytes: The object data as a byte stream.
+
+        Note:
+            Prints an error message if the retrieval fails.
         """
         try:
-            # Lấy đối tượng từ MinIO dưới dạng byte stream
-            response  = self.client.get_object(bucket_name, object_name, version_id=version_id)
+            response = self.client.get_object(bucket_name, object_name, version_id=version_id)
             data = response.read()
             response.close()
             return data
@@ -103,11 +153,16 @@ class MinioStorageOperator:
     
     def upload_object_bytes(self, objec_data, bucket_name:str, object_name:str, content_type:str):
         """
-        Upload đối tượng dưới dạng bytes từ một đường dẫn URL
+        Upload an object to MinIO storage from byte data.
 
-        :param url: đường dẫn gốc của đối tượng trên internet
-        :param bucket_name: tên bucket
-        :param object_name: đường dẫn tới tên của đối tượng trên MinIO
+        Args:
+            objec_data (bytes): The object data to upload.
+            bucket_name (str): Name of the bucket to upload to.
+            object_name (str): Name/path to store the object under in MinIO.
+            content_type (str): MIME type of the object being uploaded.
+
+        Note:
+            Prints a success message if the upload is successful, or an error message if it fails.
         """
         try:
             self.client.put_object(
@@ -122,6 +177,17 @@ class MinioStorageOperator:
             print(f"Error uploading file: {err}")
     
     def write_object_to_local(self, stream, path):
+        """
+        Write a stream object to a local file.
+
+        Args:
+            stream (io.BytesIO): The stream object containing the data to write.
+            path (str): Local file path where the data will be written.
+
+        Note:
+            Prints a success message if the write operation is successful.
+            Only attempts to write if the stream is not None.
+        """
         if stream:
             with open(path, "wb") as f:
                 f.write(stream.getvalue())

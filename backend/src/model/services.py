@@ -12,17 +12,13 @@ from core.config import get_settings
 from utils.kafka_client import Prod
 from src.model.models import Images
 from utils.operators.image import ImageOperator
-from utils.operators.storage import MinioStorageOperator
 from utils.operators.modelflow import MlflowOperator
 
 
 settings = get_settings()
-mlflow_operator = MlflowOperator(endpoint="http://160.191.244.13:7893")
-model_path = mlflow_operator.get_model_path("Image_Captioning")
+mlflow_operator = MlflowOperator(endpoint="http://36.50.135.226:7893")
+model_path = mlflow_operator.get_latest_model_path("BartPho_ViT_GPT2_LoRA_ICG", "Production")
 img_opt = ImageOperator('mlflow', model_path)
-minio_operator = MinioStorageOperator(endpoint=f'{settings.MINIO_HOST}:{settings.MINIO_PORT}', 
-                                      access_key=settings.MINIO_USER, 
-                                      secret_key=settings.MINIO_PASSWD)
 
 
 async def ingestDataToKafka(image: Images):
@@ -54,9 +50,6 @@ async def callModel(image: Images):
     
     try:
         caption = img_opt.predict_caption(image_bytes)
-        # for word in img_opt.predict_caption(image_bytes):
-        #     yield word + " "
-        #     await asyncio.sleep(0.5)
         return caption
     except Exception as ex:
         raise HTTPException(status_code=500, detail=f"Error in process image to create caption!\n {str(ex)}")

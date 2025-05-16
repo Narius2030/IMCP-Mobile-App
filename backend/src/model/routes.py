@@ -2,7 +2,7 @@ import sys
 sys.path.append('./')
 
 from fastapi import status, APIRouter
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse
 from src.model.models import Images
 from src.model.services import callModel, ingestDataToKafka
 
@@ -21,7 +21,6 @@ async def call_model(img: Images):
         "predicted_caption": data
     }
     return JSONResponse(content=payload)
-    # return StreamingResponse(callModel(img), media_type="text/plain")
 
 @model_router.post('/ingest-user-data', status_code=status.HTTP_201_CREATED)
 async def ingest_user_data(img: Images):

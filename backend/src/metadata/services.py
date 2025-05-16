@@ -13,7 +13,9 @@ from utils.operators.storage import MinioStorageOperator
 ## Global config variabels
 settings = get_settings()
 sql_opt = SQLOperators("imcp", settings)
-minio_opt = MinioStorageOperator(endpoint=f'{settings.MINIO_HOST}:{settings.MINIO_PORT}', access_key=settings.MINIO_USER, secret_key=settings.MINIO_PASSWD)
+minio_opt = MinioStorageOperator(endpoint=f'{settings.MINIO_HOST}:{settings.MINIO_PORT}', 
+                                 access_key=settings.MINIO_USER, 
+                                 secret_key=settings.MINIO_PASSWD)
 
 
 ###

@@ -7,9 +7,9 @@ from transformers import VisionEncoderDecoderModel
 from utils.operators.storage import MinioStorageOperator
 
 settings = get_settings()
-minio_operator = MinioStorageOperator(endpoint=f'{settings.MINIO_HOST}:{settings.MINIO_PORT}', 
-                                      access_key=settings.MINIO_USER, 
-                                      secret_key=settings.MINIO_PASSWD)
+minio_operator = MinioStorageOperator(endpoint=f'{settings.MINIO_HOST_VPS02}:{settings.MINIO_PORT_VPS02}', 
+                                      access_key=settings.MINIO_USER_VPS02, 
+                                      secret_key=settings.MINIO_PASSWD_VPS02)
 
 
 class ModelLoaders():
@@ -30,7 +30,6 @@ class ModelLoaders():
             str: the temporary path of `GPT configs` file
         """
         try:
-            # Lấy đối tượng từ MinIO dưới dạng byte stream
             config_url = minio_operator.get_object_bytes(bucket_name, f"{object_name}/config.json", version_id=version_id)
             generation_config_url = minio_operator.get_object_bytes(bucket_name, f"{object_name}/generation_config.json", version_id=version_id)
             model_url = minio_operator.get_object_bytes(bucket_name, f"{object_name}/model.safetensors", version_id=version_id)
@@ -42,7 +41,7 @@ class ModelLoaders():
                 'generation_config.json': generation_config_url,
                 'model.safetensors': model_url
             }
-            # Tạo một file tạm để lưu dữ liệu
+            # save model's configs in temporary file
             file_names = []
             for key, data in datasets.items():
                 temp_file_path = os.path.join(temp_dir, key)
@@ -78,6 +77,6 @@ class ModelLoaders():
             return model
         except Exception as e:
             print(f"Error loading model: {str(e)}")
-        # finally:
-        #     for file in file_names:
-        #         os.remove(file)
+        finally:
+            for file in file_names:
+                os.remove(file)

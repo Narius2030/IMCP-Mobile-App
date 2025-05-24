@@ -2,7 +2,7 @@ import sys
 sys.path.append('./')
 
 import numpy as np
-import asyncio
+import re
 import base64
 from io import BytesIO
 from PIL import Image
@@ -50,6 +50,18 @@ async def callModel(image: Images):
     
     try:
         caption = img_opt.predict_caption(image_bytes)
-        return caption
+        
+        normalized_caption = re.split(r'[ _]', caption)
+        # concatenate '.' with forward word
+        final_caption_words = list()
+        for idx, word in enumerate(normalized_caption):
+            if word == '.' and final_caption_words:
+                final_caption_words[-1] = normalized_caption[idx-1] + word
+            else:
+                final_caption_words.append(word)
+        # unify to a string
+        final_caption = ' '.join(final_caption_words)
+        print(f"CAPTION: {type(final_caption)} - {final_caption}")
+        return final_caption
     except Exception as ex:
         raise HTTPException(status_code=500, detail=f"Error in process image to create caption!\n {str(ex)}")

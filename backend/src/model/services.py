@@ -49,7 +49,7 @@ async def callModel(image: Images):
         raise HTTPException(status_code=404, detail="Image array is null!")
     
     try:
-        caption = img_opt.predict_caption(image_bytes)
+        caption = img_opt.predict_caption(image_bytes, settings.LABELS)
         
         normalized_caption = re.split(r'[ _]', caption)
         # concatenate '.' with forward word

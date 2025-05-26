@@ -38,5 +38,28 @@ class Settings(BaseSettings):
     TRINO_PORT:str = os.getenv('TRINO_PORT')
     TRINO_CATALOG:str = os.getenv('TRINO_CATALOG')
     
+    # Image Labels
+    LABELS: list[str] = [
+        "traffic image",
+        "non-traffic image",
+        "sidewalk",
+        "pedestrian bridge",
+        "underpass",
+        "traffic light",
+        "crosswalk",
+        "road sign",
+        "highway",
+        "intersection",
+        "roundabout",
+        "guardrail",
+        "bus stop",
+        "parking lot",
+        "car",
+        "bus",
+        "truck",
+        "motorcycle",
+        "bicycle"
+    ]
+    
 def get_settings() -> Settings:
     return Settings()

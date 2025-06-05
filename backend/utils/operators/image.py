@@ -54,9 +54,9 @@ class ImageOperator:
                 print("Error: OpenCV could not decode the image.")
                 return None
             # convert from bgr (opencv) sang rgb
-            image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            print("Image shape: ", image_rgb.shape)
-            return image_rgb
+            # image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            print("Image shape: ", image.shape)
+            return image
 
         except requests.exceptions.RequestException as e:
             print(f"Error: Request failed - {e}")

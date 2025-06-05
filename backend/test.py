@@ -5,11 +5,11 @@ from PIL import Image
 
 
 def image_generator():
-    with open('./data/cat2.jpg', 'rb') as file:
+    with open('./data/01.jpg', 'rb') as file:
         image_bytes = file.read()
         image_base64 = base64.b64encode(image_bytes).decode("utf-8")
     
-    with Image.open('./data/cat2.jpg') as img:
+    with Image.open('./data/01.jpg') as img:
         width, height = img.size
     return image_base64, width, height
 

@@ -22,5 +22,9 @@ docker-compose up --build
 
 ## Mobile Application UI
 
-![image](https://github.com/user-attachments/assets/c01c8783-1f26-43d3-8db1-14ecba9bcd52)
+![image](https://github.com/user-attachments/assets/7ce57919-4b65-422e-9d46-f5779352a102)
+
+![image](https://github.com/user-attachments/assets/a81f8367-781f-4370-b41c-5a0e846212a6)
+
+
 

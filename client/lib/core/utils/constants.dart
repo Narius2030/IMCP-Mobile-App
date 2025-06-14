@@ -1,5 +1,7 @@
-class AppConstants {
-  static const String baseUrl = "http://36.50.135.226:80";
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-  static const String API_GENERATE_CAPTION = "$baseUrl/api/v1";
+class AppConstants {
+  static String baseUrl = dotenv.env["API_BASE_URL"]!;
+
+  static String API_GENERATE_CAPTION = "$baseUrl/api/v1";
 }

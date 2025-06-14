@@ -2,11 +2,9 @@ import 'dart:developer';
 import 'package:camerawesome/camerawesome_plugin.dart';
 import 'package:client/presentation/widgets/modals/caption_modal_bottom.dart';
 import 'package:client/core/utils/colors.dart';
-import 'package:client/presentation/widgets/model_wheel_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -108,24 +106,6 @@ class _HomePageState extends State<HomePage> {
                   );
                 },
               ),
-              // Builder(
-              //   builder: (context) {
-              //     return Container(
-              //       height: 40,
-              //       width: double.infinity,
-              //       decoration: BoxDecoration(
-              //         color: Colors.black.withOpacity(0.5),
-              //       ),
-              //       child: ModelWheelPicker(
-              //         options: lstmModel,
-              //         onValueChanged: (selected) {
-              //           log('Selected model: $selected');
-              //           chosenModel = selected;
-              //         },
-              //       ),
-              //     );
-              //   },
-              // ),
             ],
           );
         },

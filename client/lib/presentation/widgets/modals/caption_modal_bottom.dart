@@ -1,7 +1,5 @@
 import 'dart:developer';
 import 'dart:io';
-
-import 'package:client/core/utils/colors.dart';
 import 'package:client/models/image_model.dart';
 import 'package:client/presentation/screens/photo_view.dart';
 import 'package:client/presentation/widgets/shimmers/caption_shimmer.dart';
@@ -11,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart'; // Import the package
 import 'package:get_it/get_it.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:photo_view/photo_view.dart';
 import 'package:typewritertext/typewritertext.dart';
 import 'dart:math' as math;
 
@@ -77,7 +74,8 @@ class _CaptionModalBottomState extends State<CaptionModalBottom> {
   }
 
   Future<void> speakCaption(String caption) async {
-    await flutterTts.setLanguage("en-US");
+    await flutterTts.setLanguage("vi-VN");
+    await flutterTts.setVolume(1.0);
     await flutterTts.setPitch(1.0);
     await flutterTts.setSpeechRate(0.5);
     await flutterTts.speak(caption);
@@ -99,7 +97,7 @@ class _CaptionModalBottomState extends State<CaptionModalBottom> {
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
-      initialChildSize: 0.7,
+      initialChildSize: 0.9,
       minChildSize: 0.5,
       maxChildSize: 0.9,
       expand: false,
@@ -114,18 +112,42 @@ class _CaptionModalBottomState extends State<CaptionModalBottom> {
               ),
               child: Column(
                 children: [
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      color: const Color(0xFF212121),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: const Icon(
-                        Icons.close_rounded,
-                        size: 30,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      FutureBuilder(
+                        future: _future,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const SizedBox.shrink();
+                          } else if (snapshot.hasError) {
+                            return Text("Error: ${snapshot.error}");
+                          } else {
+                            return IconButton(
+                              color: const Color(0xFF212121),
+                              onPressed: () {
+                                speakCaption(snapshot.data.toString());
+                              },
+                              icon: const Icon(
+                                Icons.volume_up_rounded,
+                                size: 30,
+                              ),
+                            );
+                          }
+                        },
                       ),
-                    ),
+                      IconButton(
+                        color: const Color(0xFF212121),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          size: 30,
+                        ),
+                      ),
+                    ],
                   ),
                   Stack(
                     children: [
@@ -145,8 +167,7 @@ class _CaptionModalBottomState extends State<CaptionModalBottom> {
                           child: Image.file(
                             File(widget.imagePreview.path),
                             width: double.infinity,
-                            height: 200,
-                            fit: BoxFit.cover,
+                            fit: BoxFit.contain,
                           ),
                         ),
                       ),

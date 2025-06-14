@@ -17,6 +17,7 @@ class ImageService {
       ImageModel imageModel, CancelToken cancelToken) async {
     try {
       var url = "${AppConstants.API_GENERATE_CAPTION}/model/predict-caption";
+
       final response = await dio.post(
         url,
         data: imageModel.toJson(),
@@ -92,24 +93,6 @@ class ImageService {
       throw Exception("Error saving user data $e");
     }
   }
-
-  // String cleanCaption(String caption) {
-  //   String cleanedCaption = caption
-  //       .replaceAll(RegExp(r'[^a-zA-Z0-9\s.,!?\"]'), '') // Xóa ký tự đặc biệt
-  //       .replaceAll(RegExp(r'\s+'), ' ')
-  //       .trim();
-
-  //   List<String> words = cleanedCaption.split(' ');
-
-  //   if (words.length > 2) {
-  //     words.removeAt(0);
-  //     words.removeAt(words.length - 1);
-  //   } else {
-  //     return '';
-  //   }
-
-  //   return words.join(' ');
-  // }
 
   String cleanCaption(String caption) {
     // Use a regular expression to remove content within {}

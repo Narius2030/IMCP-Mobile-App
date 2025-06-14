@@ -1,0 +1,2 @@
+C:/Programming/other_projects/SideProject/IMCP-Mobile-App/client/android/app/.cxx/RelWithDebInfo/5z555l53/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Programming/other_projects/SideProject/IMCP-Mobile-App/client/android/app/.cxx/RelWithDebInfo/5z555l53/armeabi-v7a/CMakeFiles/rebuild_cache.dir
